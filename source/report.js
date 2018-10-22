@@ -762,7 +762,9 @@ document.addEventListener('DOMContentLoaded', function () {
     loadAll();
   });
   //setTimeout(loadAll,100); //review this might help reduce timing issues
+  $("#alertNotes").click(alertNotes);
 });
+
 
 function loadAll() {
   //chrome Content Security Policy (CSP) needs DOMContentLoaded
@@ -4915,4 +4917,18 @@ function getSQLReport(sql, values, callback) {
     showError(status);
   });
 }
-
+function alertNotes(){
+  var notes = [];
+  var today = new Date();
+  var day = '';
+  var days  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  if (today.getDay() == 1){
+    day   = days[ today.getDay()+4 ];
+  }else{
+    day   = days[ today.getDay()-1 ];
+  }
+  $(".agile_tooltipTable tbody").children().each(function(index){
+    notes.push($(this).find("td").eq(3).text());
+  });
+  alert("*" + day + ":* " + notes.join(" / "));
+}

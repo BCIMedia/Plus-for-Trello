@@ -23,10 +23,9 @@
     <script type="text/javascript" src="sharedsync.js"></script>
     <script type="text/javascript" src="report.js"></script>
     <style>
-.report_class_white_text {
-  color:white !important; /* Needs to be here and not in style.css, we dont want background to inherit, so when user copies and pastes to excel, text will be black, not white */
-}
-
+      .report_class_white_text {
+        color:white !important; /* Needs to be here and not in style.css, we dont want background to inherit, so when user copies and pastes to excel, text will be black, not white */
+      }
     </style>
   </head>
   <body style="font-family: Helvetica Neue,Arial,Helvetica,sans-serif;font-size: 1em;margin-bottom:0px;margin-top:5px;overflow:hidden;" class="agile_report_minSize">
@@ -41,6 +40,7 @@
             <span id="report_title_text">&nbsp;</span>
             <span id="report_title_rightLinks" style="display:none;">
               <button id="buttonMarkallRead" style="margin-left: 2em; margin-top: 0; margin-bottom: 0;display: none; ">Mark all viewed</button>
+              <button id="alertNotes" style="float:right;text-decoration:none;font-size:110%;margin-right:1em;" href="#" target="" title="notes">Notes</button>
               <a style="float:right;text-decoration:none;cursor:help;font-size:110%;margin-right:1em;" href="http://www.plusfortrello.com/p/report-documentation-and-examples.html" target="_blank" title="¡dlǝɥ">Help</a>
               <span id="agile_reload_page">data changed. <b><a href="" target="_self" id="agile_reload_page_link">Reload</a></b>&nbsp;</span>
             </span>
