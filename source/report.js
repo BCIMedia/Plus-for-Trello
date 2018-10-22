@@ -4920,12 +4920,12 @@ function getSQLReport(sql, values, callback) {
 function alertNotes(){
   var notes = [];
   var today = new Date();
-  var day = '';
   var days  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  if (today.getDay() == 1){
-    day   = days[ today.getDay()+4 ];
-  }else{
-    day   = days[ today.getDay()-1 ];
+  var day   = days[today.getDay() == 1 ? today.getDay()+4 : today.getDay()-1];
+  if (day == 'Friday'){
+    var timeDiff = today - new Date("10/12/2018"); // A great Friday to calculate on.
+    var dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    if (dayDiff % 14 <= 7) day = "Great Friday";
   }
   $(".agile_tooltipTable tbody").children().each(function(index){
     notes.push($(this).find("td").eq(3).text());
