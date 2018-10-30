@@ -4928,7 +4928,7 @@ function alertNotes(){
     if (dayDiff % 14 <= 7) day = "Great Friday";
   }
   $(".agile_tooltipTable tbody").children().each(function(index){
-    notes.push($(this).find("td").eq(3).text());
+    notes.push($(this).find("td").eq(3).text() + ' [' + $(this).find("td").eq(7).text() + ']');
   });
   alert("*" + day + ":* " + notes.join(" / "));
 }
