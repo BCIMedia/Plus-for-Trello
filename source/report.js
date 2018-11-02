@@ -4930,5 +4930,7 @@ function alertNotes(){
   $(".agile_tooltipTable tbody").children().each(function(index){
     notes.push($(this).find("td").eq(3).text() + ' [' + $(this).find("td").eq(7).text() + ']');
   });
-  alert("*" + day + ":* " + notes.join(" / "));
+  navigator.clipboard.writeText("*" + day + ":* " + notes.join(" / ") + "\n*" + days[new Date().getDay()] + ":*");
+  $("#alertNotes").text("Copied to Clipboard");
+  setTimeout(function(){ $("#alertNotes").text("Notes") }, 1000);
 }
