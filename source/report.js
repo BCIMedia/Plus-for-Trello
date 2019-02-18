@@ -4920,8 +4920,10 @@ function getSQLReport(sql, values, callback) {
 function alertNotes(){
   var notes = [];
   var today = new Date();
+  var noteDay = new Date();
+  noteDay.setDate(today.getDay() == 1 ? today.getDate()-3 : today.getDate()-1);
   var days  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  var day   = days[today.getDay() == 1 ? today.getDay()+4 : today.getDay()-1];
+  var day   = days[noteDay.getDay()];
   if (day == 'Friday'){
     var timeDiff = today - new Date("10/12/2018"); // A great Friday to calculate on.
     var dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
