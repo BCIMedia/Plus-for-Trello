@@ -4929,7 +4929,7 @@ function alertNotes(){
     var dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
     if (dayDiff % 14 <= 7) day = "Great Friday";
   }
-  if(days[today.getDay()] == "Monday" && $("#sinceSimple").val() == "d=2"){
+  if(days[today.getDay()] == "Monday" && $("#sinceSimple").val() != "d-4"){
     $("#sinceSimple").val("d-4");
     $("#agile_title_header_report").children('button').click()
   }
