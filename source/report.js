@@ -4924,6 +4924,8 @@ function alertNotes(){
   noteDay.setDate(today.getDay() == 1 ? today.getDate()-3 : today.getDate()-1);
   var days  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var day   = days[noteDay.getDay()];
+  //Was last work day a Great Friday?
+  //
   if (day == 'Friday'){
     var timeDiff = today - new Date("10/12/2018"); // A great Friday to calculate on.
     var dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
@@ -4933,10 +4935,32 @@ function alertNotes(){
     $("#sinceSimple").val("d-4");
     $("#agile_title_header_report").children('button').click()
   }
-  $(".agile_tooltipTable tbody").children().each(function(index){
-    notes.push($(this).find("td").eq(3).text() + ' [' + $(this).find("td").eq(7).text() + ']');
-  });
-  navigator.clipboard.writeText("*" + day + ":* " + notes.join(" / ") + "\n*" + days[new Date().getDay()] + ":*");
+
+  // Depending on group by show notes for shown columns
+  var groupBy = $('#groupBy option:selected' ).text();
+  if(groupBy == "Card"){
+    $(".agile_tooltipTable tbody").children().each(function(index){
+      notes.push($(this).find("td").eq(3).text() + ' [' + $(this).find("td").eq(7).text() + ']');
+    });
+  }else if(groupBy == "S/E rows"){
+    $(".agile_tooltipTable tbody").children().each(function(index){
+      var time_note = $(this).find("td").eq(10).text();
+      if(time_note.length > 1){
+        notes.push($(this).find("td").eq(6).text() + ' `' + time_note +  '` [' + $(this).find("td").eq(7).text() + ']');
+      }
+      else {
+        notes.push($(this).find("td").eq(6).text() + ' [' + $(this).find("td").eq(7).text() + ']');
+      }
+    });
+  }
+  //Is today a Great Friday
+  var this_day = days[new Date().getDay()]
+  if (this_day == 'Friday'){
+    var timeDiff = today - new Date("10/12/2018"); // A great Friday to calculate on.
+    var dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    if (dayDiff % 14 <= 7) this_day = "Great Friday";
+  }
+  navigator.clipboard.writeText("*" + day + ":* " + notes.join(" / ") + "\n*" + this_day + ":*");
   $("#alertNotes").text("Copied to Clipboard");
   setTimeout(function(){ $("#alertNotes").text("Notes") }, 1000);
 }
