@@ -4957,7 +4957,7 @@ function alertNotes(){
       }
     });
     $.each( split_notes, function( key, value ) {
-      notes.push(key + "\n  " + value.join("\n  "));
+      notes.push(key + "\n•" + value.join("\n•"));
     });
 
   }
