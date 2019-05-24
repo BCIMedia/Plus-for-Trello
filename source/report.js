@@ -4957,7 +4957,7 @@ function alertNotes(){
       }
     });
     $.each( split_notes, function( key, value ) {
-      notes.push(key + value.join(", "));
+      notes.push(key + "\n  " + value.join("\n  "));
     });
 
   }
@@ -4968,7 +4968,7 @@ function alertNotes(){
     var dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
     if (dayDiff % 14 <= 7) this_day = "Great Friday";
   }
-  navigator.clipboard.writeText("*" + day + ":* " + notes.join(" / ") + "\n*" + this_day + ":*");
+  navigator.clipboard.writeText("*" + day + ":*\n" + notes.join("\n") + "\n*" + this_day + ":*");
   $("#alertNotes").text("Copied to Clipboard");
   setTimeout(function(){ $("#alertNotes").text("Notes") }, 1000);
 }
