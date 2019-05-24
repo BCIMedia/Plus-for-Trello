@@ -4943,15 +4943,23 @@ function alertNotes(){
       notes.push($(this).find("td").eq(3).text() + ' [' + $(this).find("td").eq(7).text() + ']');
     });
   }else if(groupBy == "S/E rows"){
+    var split_notes = {};
     $(".agile_tooltipTable tbody").children().each(function(index){
+      if(split_notes[$(this).find("td").eq(6).text()] === undefined){
+        split_notes[$(this).find("td").eq(6).text()] = [];
+      }
       var time_note = $(this).find("td").eq(10).text();
       if(time_note.length > 1){
-        notes.push($(this).find("td").eq(6).text() + ' `' + time_note +  '` [' + $(this).find("td").eq(7).text() + ']');
+        split_notes[$(this).find("td").eq(6).text()].push(' `' + time_note +  '` [' + $(this).find("td").eq(7).text() + ']');
       }
       else {
-        notes.push($(this).find("td").eq(6).text() + ' [' + $(this).find("td").eq(7).text() + ']');
+        split_notes[$(this).find("td").eq(6).text()].push(' [' + $(this).find("td").eq(7).text() + ']');
       }
     });
+    $.each( split_notes, function( key, value ) {
+      notes.push(key + value.join(", "));
+    });
+
   }
   //Is today a Great Friday
   var this_day = days[new Date().getDay()]
