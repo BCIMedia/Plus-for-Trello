@@ -329,6 +329,7 @@ function clearAllStorage(callback) {
                 if (g_strServiceUrl)
                     pairsLocal["serviceUrlLast"] = g_strServiceUrl; //restore it to  prevent the "spreadsheet permissions" preface dialog from showing after a reset 
                 pairsLocal[LOCALPROP_PRO_VERSION] = g_bProVersion;
+                pairsLocal[LOCALPROP_PRO_MSDATEENABLED] = g_msStartPro;
                 chrome.storage.local.set(pairsLocal, function () {
                     if (chrome.runtime.lastError) {
                         console.log(chrome.runtime.lastError.message);

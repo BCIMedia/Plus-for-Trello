@@ -100,7 +100,7 @@ function handleHomeTour() {
             id: 7,
             selector: "#headerSEActivities",
             text: "This section shows <br>Spent charts, your recent S/E and cards with Remaining balance.<br><br>Click to show or hide.",
-            angle: 90,
+            angle: 180,
             distance: 0,
             size: 200,
             bSEOnly: true
@@ -141,7 +141,7 @@ function handleHomeTour() {
             },
             {
                 id: 11,
-                selector: ".js-boards-menu",
+                selector: '[data-test-id="header-boards-menu-button"], .js-boards-menu',
                 text: "<b>Go to a board</b><br>to continue the tour",
                 angle: 90+45,
                 distance: 0,

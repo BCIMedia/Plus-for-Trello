@@ -13,8 +13,9 @@ var LS_KEY_detectedErrorLegacyUpgrade = "detectedErrorLegacyUpgrade";
 //ver 3: 3.4.4
 //ver 4: 3.6.x (add labels)
 //ver 5: 3.6.6, fix bug where due dates were not being sync sometimes (due to introduction of search with incomplete card fields)
+//ver 6: 5.1.2, add card dueComplete
 var VERDEEPSYNC = {
-    CURRENT: 5,  //making it bigger will trigger a "deep sync" on all boards. Temporary solution to running deep sync. must be >0
+    CURRENT: 6,  //making it bigger will trigger a "deep sync" on all boards. must be > MINVALID
     MINVALID: 0,
     NOTMEMBER: -1 //hackinsh way to keep a special board state when user is no longer a member of the board. needed to distinguish from zero in first-sync case with existing db data
 };

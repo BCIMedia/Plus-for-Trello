@@ -2181,8 +2181,9 @@ function loadCardTimer(idCard) {
 		timerElem.removeAttr('disabled');
 		timerElem.click(function (evt) {
 		    var msEvent = Date.now(); //workarround dont rely on evt.timeStamp (possibly https://code.google.com/p/chromium/issues/detail?id=578243)
-		    testExtension(function () {
-		        handleCardTimerClick(msEvent, hash, timerElem, timerStatus, idCard);
+            var pt = {x:evt.screenX, y:evt.screenY};
+            testExtension(function () {
+		        handleCardTimerClick(msEvent, hash, timerElem, timerStatus, idCard, pt);
 		    });
 		});
 	});
@@ -2191,19 +2192,53 @@ function loadCardTimer(idCard) {
 	return timerElem;
 }
 
+var g_cHilitesTimer = 0; //if its 
+function checkNeedHiliteTimer() {
+    chrome.storage.local.get(LOCALPROP_bHiliteTimerOnOpenCard, function (obj) {
+        var value = obj[LOCALPROP_bHiliteTimerOnOpenCard];
+        if (value)
+            g_cHilitesTimer = 2;
+        else
+            g_cHilitesTimer = 0;
+        var pair = {};
+        pair[LOCALPROP_bHiliteTimerOnOpenCard] = false;
+        chrome.storage.local.set(pair, function () {
+            if (chrome.runtime.lastError) {
+                //fall-through
+            }
+        });
+    });
+}
+
 function updateTimerTooltip(timerElem, bRunning, bRemoveSmallTimerHelp, bUpdateCards) {
     bRemoveSmallTimerHelp = bRemoveSmallTimerHelp || false; //review zig remove
 	bUpdateCards = bUpdateCards || false;
+
 	var title = "";
 	var strClassRunning = "agile_timer_running";
+	var bReplaceClass = false;
+	if (g_cHilitesTimer>0) {
+	    bReplaceClass = true;
+	    g_cHilitesTimer--;
+	}
+	checkNeedHiliteTimer();
+
 	if (bRunning) {
-		timerElem.addClass(strClassRunning);
+	    if (!bReplaceClass)
+	        timerElem.addClass(strClassRunning);
+	    else
+	        timerElem.removeClass(strClassRunning);
 		title = "Click to stop or pause the Plus timer.";
 	}
 	else {
 		timerElem.removeClass(strClassRunning);
 		title = "Click to start the Plus timer.";
 	}
+
+	if (bReplaceClass)
+	    timerElem.addClass("agile_timer_hilite");
+	else
+	    timerElem.removeClass("agile_timer_hilite");
 
 	timerElem.attr('title', title);
 	if (bUpdateCards) {
@@ -2270,7 +2305,7 @@ function updateTimerElemText(timerElem, msStart, msEnd) {
 }
 
 
-function handleCardTimerClick(msDateClick, hash, timerElem, timerStatus, idCard) {
+function handleCardTimerClick(msDateClick, hash, timerElem, timerStatus, idCard, ptClick) {
     chrome.storage.sync.get([SYNCPROP_ACTIVETIMER], function (objActiveTimer) {
         var idCardActiveTimer = null;
         idCardActiveTimer = (objActiveTimer[SYNCPROP_ACTIVETIMER] || null);
@@ -2320,7 +2355,7 @@ function handleCardTimerClick(msDateClick, hash, timerElem, timerStatus, idCard)
                         clearBlinkButtonInterval();
                         $("#plusCardCommentEnterButton").removeClass("agile_box_input_hilite");
                     }
-                    showTimerPopup(idCard);
+                    showTimerPopup(idCard, ptClick);
                 });
             }
             else if (stored.msStart != null && stored.msEnd == null) {

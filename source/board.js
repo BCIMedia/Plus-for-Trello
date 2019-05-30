@@ -134,7 +134,7 @@ function updateCardsWorker(boardCur, responseParam, bShowBoardTotals, defaultSE,
 
                 var se = parseSE(title, false);
               
-                if (g_dimension == VAL_COMBOVIEWKW_KWONLY) {
+                if (g_dimension != VAL_COMBOVIEWKW_CARDTITLES && g_dimension != VAL_COMBOVIEWKW_ALL) {
                     se.estimate = 0;
                     se.spent = 0;
                 }

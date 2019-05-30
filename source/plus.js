@@ -13,6 +13,8 @@ var g_cRowsWeekByUser = 0; //gets set after making the chart. Used by the tour
 var g_bShowHomePlusSections = true;
 var g_bSkipUpdateSsLinks = false; //used by dimensions dropdown to hack arround legacy way to start sync
 var g_bInsertedStripeScript = false;
+var g_fnCallbackStripeMessage=null;
+
 const PROP_LS_MSLASTNOSYNCWARN = "msLastSyncWarn"; //warning: can be in the future. date since last time we showed the configure warning. 
 const PROP_LS_MSLAST_IGNORE_EXTUPGRADE = "msLastIgnoreExtUpg";
 const PROP_LS_ASKEDNOTUSINGSE = "ASKEDNOTUSINGSE";
@@ -187,18 +189,13 @@ function showAproveGoogleSyncPermissions(callback) {
 }
 
 function handleProAproval(callback) {
-    showApproveProTrialDialog(function (bOK) {
-        if (!bOK) {
-            callback(STATUS_CANCEL);
-        }
-        else {
-            sendExtensionMessage({ method: "requestProPermission" }, function (response) {
-                callback(response.status);
-            });
-        }
+
+    sendExtensionMessage({ method: "requestProPermission" }, function (response) {
+        callback(response.status);
     });
 }
 
+//REVIEW: remove dialog
 function showApproveProTrialDialog(callback) {
     var divDialog = $(".agile_dialog_showAprovePro");
     if (divDialog.length == 0) {
@@ -362,20 +359,32 @@ var g_userTrelloCurrent = null;
 function getCurrentTrelloUser() {
 	if (g_userTrelloCurrent != null)
 		return g_userTrelloCurrent;
-	var headerBarItem = $(".js-open-header-member-menu");
-	if (headerBarItem.length == 0) {
-		headerBarItem = $(".header-auth");
-		if (headerBarItem.length == 0) {
-			//try later. most likely user not logged-in 
-			return null;
-		}
-	}
-	var avatarElem = headerBarItem.eq(0).find($(".member-avatar"))[0];
-	if (avatarElem === undefined)
-		avatarElem = headerBarItem.eq(0).find($(".member-initials"))[0];
-	if (avatarElem === undefined)
+	var header = $('#header');
+	
+	if (header.length==0)
 		return null;
-	var userElem = avatarElem.title;
+
+	var elemUserMenu = header.find('[data-test-id="header-member-menu-button"]');
+	var userElem = null;
+	if (elemUserMenu.length==0) {
+		var headerBarItem = $(".js-open-header-member-menu");
+		if (headerBarItem.length == 0) {
+			headerBarItem = $(".header-auth");
+			if (headerBarItem.length == 0) {
+				//try later. most likely user not logged-in 
+				return null;
+			}
+		}
+		var avatarElem = headerBarItem.eq(0).find($(".member-avatar"))[0];
+		if (avatarElem === undefined)
+			avatarElem = headerBarItem.eq(0).find($(".member-initials"))[0];
+		if (avatarElem === undefined)
+			return null;
+		userElem = avatarElem.title;
+	} else {
+		userElem = elemUserMenu[0].title;
+	}
+
 
     //search for the last () pair because the user long name could also have parenthesis
     //this happens a lot in users with non-western names, where trello adds the western name in parenthesis,
@@ -1424,6 +1433,9 @@ function configureSsLinksWorkerPostOauth(resp, b, user, bUpdateErrorState) {
 }
 
 function checkTrelloLogo() {
+	return; //review: since 2019-03-13 trello no longer exposes a way to find the logo.
+	//here we used to prevent the trello logo from intersecting the Plus header on small windows.
+	
     var trelloLogo = $(".header-logo-default");
     var topbarElem = $("#agile_help_buttons_container");
 
@@ -1580,6 +1592,17 @@ function processUserSENotifications(sToday,sWeek) {
 	}
 }
 
+function bAtTrelloHome() {
+    var url = document.URL.toLowerCase();
+    var user = g_userTrelloCurrent.toLowerCase();
+    if (url.lastIndexOf("/#") == url.length - 2)
+        url = url.substring(0, url.length - 2);
+
+    if (url != "https://trello.com/" && url != "https://trello.com/"+user+"/boards")
+        return false;
+    return true;
+}
+
 function insertFrontpageCharts(dataWeek, user) {
     if (g_bNoSE)
         return;
@@ -1598,7 +1621,7 @@ function insertFrontpageChartsWorker(mainDiv, dataWeek, user) {
         g_chartsCache = {};
 
     var divInsertAfter = $(".boards-page-board-section");
-    var divPrepend = $(".home-container"); //new trello home april 2018
+    var divPrepend = $(".home-container"); //new trello home april 2018 see bAtNewTrelloHome
 
     if (divInsertAfter.length == 0) {
         if (divPrepend.length == 0) {
@@ -1627,13 +1650,16 @@ function insertFrontpageChartsWorker(mainDiv, dataWeek, user) {
 		seContainer.append(seHeader);
 		var waiter = CreateWaiter(4, function () { //review promise
 		    seContainer.append(divSpentItems);
-		    if (divInsertAfter.length > 0)
-		        seContainer.insertAfter(divInsertAfter);
-		    else {
+		    if (divPrepend.length > 0) {
 		        seHeader.addClass("seContainerNewTrello");
-		        divPrepend.children(".sticky-spacer").css("margin-top", "-26px");
 		        divPrepend.parent().prepend(seContainer);
+		        divPrepend.children(".home-sticky-container").css("margin-top", "-"+seContainer.height().toString()+"px");
+		        }
+		    else {
+		        assert(divInsertAfter.length > 0);
+		        seContainer.insertAfter(divInsertAfter); 
 		    }
+
 		    function refreshAll() {
                 //all these is so we can have the chart drawn and height calculated before we start the slide
 		        divSpentItems.css("opacity", 0);
@@ -2533,11 +2559,11 @@ function updateShowAllButtonState(elem, bFirstTime) {
 		if (bShow) {
 			elem.removeClass("agile_all_unpressed");
 			elem.addClass("agile_all_pressed");
-			elem.attr("title", "Click to hide old boards and cards.\nMake sure Trello card aging is enabled.");
+			elem.attr("title", "Click to hide old cards.\nMake sure Trello card aging is enabled.");
 		} else {
 			elem.removeClass("agile_all_pressed");
 			elem.addClass("agile_all_unpressed");
-			elem.attr("title", "Click to show old boards and cards.");
+			elem.attr("title", "Click to show old cards.");
 			if (bFirstTime)
 			    hiliteOnce(elem, 0, "agile_box_more_hilite");
 			showHiddenCardsAlert();
@@ -2696,7 +2722,7 @@ function insertStripeDialog(liDataStripe) {
     <div style="display:none;" id="agile_stripe_licence_info" >\
         <p><b>Done! License processed OK.</b> You will receive an email shortly.</p>\
         Activate other computers with this URL or forward them the email: <input readonly id="agile_stripe_licence"  style="width:100%;" />\
-        Start date: <span id="agile_stripe_startdate"></span>. Edit the license from the Plus help pane.\
+        Start date: <span id="agile_stripe_startdate"></span>. View the license from the Plus help pane.\
     </div>\
     <button id="agile_stripe_ok" style="display:none;">OK</button>\
 </div>\
@@ -2763,7 +2789,15 @@ function insertStripeDialog(liDataStripe) {
 }
 
 
-function handleStripePay() {
+function handleStripePay(callbackIn) {
+    var bCalledBack = false;
+    function callback() {
+        if (callbackIn && !bCalledBack) {
+            bCalledBack = true;
+            callbackIn();
+        }
+    }
+
     var divStripeForm = $(".agile_dialog_stripe_pay");
     if (divStripeForm.length > 0) {
         alert("Sorry, there was an error. Please refresh this Trello page and try again.");
@@ -2794,6 +2828,33 @@ function handleStripePay() {
         if (!divStripeForm)
             return;
 
+		function addCustomEventListener() {
+			if (g_fnCallbackStripeMessage) {
+				window.removeEventListener('message', g_fnCallbackStripeMessage)
+				g_fnCallbackStripeMessage=null;
+			}
+
+			function callbackEvent(event) {
+				if (event && event.isTrusted && event.data && event.data.type && event.data.type == "agile_stripe_data") {
+                    //msCreated, li, userTrello, emailOwner, quantity, name
+                    var license = event.data.license;
+                    if (license && license.quantity>0)
+                        hitAnalytics("LicActivation", "OK-ACTIVATED-STRIPE");
+                    var objNew = {};
+                    objNew[SYNCPROP_LIDATA_STRIPE] = license;
+                    chrome.storage.sync.set(objNew, function () {
+                        if (chrome.runtime.lastError) {
+                            alert(chrome.runtime.lastError.message);
+                            return;
+                        }
+                        callback();
+                    });
+                }
+			}
+			g_fnCallbackStripeMessage=callbackEvent;
+			window.addEventListener('message', callbackEvent);
+		}
+
         if (g_bInsertedStripeScript) {
             insertWrap();
         } else {
@@ -2814,26 +2875,19 @@ function handleStripePay() {
             script.src = 'https://js.stripe.com/v3/';
             script.onload = insertWrap;
             document.head.appendChild(script);
-            window.addEventListener('message', function (event) {
-                if (event && event.isTrusted && event.data && event.data.type && event.data.type == "agile_stripe_data") {
-                    //msCreated, li, userTrello, emailOwner, quantity, name
-                    var license = event.data.license;
-                    hitAnalytics("LicActivation", "OK-ACTIVATED-STRIPE");
-                    var objNew = {};
-                    objNew[SYNCPROP_LIDATA_STRIPE] = license;
-                    chrome.storage.sync.set(objNew, function () {
-                        if (chrome.runtime.lastError) {
-                            alert(chrome.runtime.lastError.message);
-                            return;
-                        }
-                    });
-                }
-            });
-        }
+		}
+		addCustomEventListener();
     });
 }
 
-function checkLi(bForce, bExpanded) {
+function checkLi(bForce, bExpanded, callbackIn) {
+    var bCalledBack = false;
+    function callback() {
+        if (callbackIn && !bCalledBack) {
+            bCalledBack = true;
+            callbackIn();
+        }
+    }
     chrome.storage.local.get([LOCALPROP_PRO_VERSION], function (obj) {
         if (chrome.runtime.lastError) {
             console.error(chrome.runtime.lastError.message);
@@ -2854,36 +2908,28 @@ function checkLi(bForce, bExpanded) {
             var liData = obj[SYNCPROP_LIDATA] || { msLastCheck: 0, msCreated: 0, li: "" };
             var liDataStripe = obj[SYNCPROP_LIDATA_STRIPE] || { msLastCheck: 0, msCreated: 0, li: "" };
             var msNow = Date.now();
-            if (!bForce && (liData.li || liDataStripe.li))
+            if (!bForce && (liData.li || (liDataStripe.li && liDataStripe.quantity>0)))
                 return; //review zig expiration etc
 
             var msLast = Math.max(liData.msLastCheck || 0, liDataStripe.msLastCheck || 0);
             var bWaitCheck = !bForce;
-            if (bWaitCheck && (msNow - msLast < 1000 * 60 * 60 * 35)) //35 hours
+            if (bWaitCheck && (msNow - msLast < 1000 * 60 * 60 * 4)) //4 hours
                 return;
 
             liData.msLastCheck = msNow;
             liDataStripe.msLastCheck = msNow; //note: currently we are not saving this value. Existing code will check liData.msLastCheck for showing dialog below
 
-            function saveLi(liData) {
-                var objNew = {};
-                //update msLastCheck
-                objNew[SYNCPROP_LIDATA] = liData;
-                chrome.storage.sync.set(objNew, function () {
-                    if (chrome.runtime.lastError)
-                        console.error(chrome.runtime.lastError.message);
-                });
-            }
 
-            function saveLiIfNewer(liData) {
+            function updateLiIfNewer(liData, bStripeMode) {
                 //update msLastCheck if needed. must reload storage
-                chrome.storage.sync.get([SYNCPROP_LIDATA], function (obj) {
+                const propLi = (bStripeMode ? SYNCPROP_LIDATA_STRIPE : SYNCPROP_LIDATA);
+                chrome.storage.sync.get([propLi], function (obj) {
                     if (chrome.runtime.lastError)
                         return;
                     var msLastCheckLast = liData.msLastCheck;
-                    var liDataFromSync = obj[SYNCPROP_LIDATA];
+                    var liDataFromSync = obj[propLi];
 
-                    if (liDataFromSync && liData.li) {
+                    if (liDataFromSync && liData.li && liData.li != liDataFromSync.li) {
                         //this is grave, we could save the new license anyway but it should never get here and may mess it up further so just log it
                         logPlusError("unexpected: received license in saveLiIfNewer. license:" + liData.li + ". previous retained:" + liDataFromSync.li);
                     }
@@ -2892,7 +2938,13 @@ function checkLi(bForce, bExpanded) {
                     //this check will be false when we saved a newer liData to storage after we had set msNow to our local liData
                     if (liData.msLastCheck <= msLastCheckLast) {
                         liData.msLastCheck = msLastCheckLast;
-                        saveLi(liData);
+                        var objNew = {};
+                        //update msLastCheck
+                        objNew[propLi] = liData;
+                        chrome.storage.sync.set(objNew, function () {
+                            if (chrome.runtime.lastError)
+                                console.error(chrome.runtime.lastError.message);
+                        });
                     }
                 });
             }
@@ -2902,7 +2954,7 @@ function checkLi(bForce, bExpanded) {
                     hitAnalytics("LicDialog", (bStripeMode?"Stripe-":"Webstore-")+status);
                     if (status == STATUS_OK) {
                         if (bStripeMode) {
-                            handleStripePay();
+                            handleStripePay(callback);
                             return;
                         }
                         sendExtensionMessage({ method: "checkLi" }, function (response) {
@@ -2918,11 +2970,14 @@ function checkLi(bForce, bExpanded) {
                                     sendDesktopNotification("License not activated because the purchase was cancelled.", 12000);
                                 else
                                     sendDesktopNotification("An error happened. Please try later. " + response.status, 12000);
-                                saveLiIfNewer(liData);
+                                updateLiIfNewer(liData, bStripeMode);
                             }
+
+                            callback();
+
                         });
                     } else {
-                        saveLiIfNewer(liData);
+                        updateLiIfNewer(liData, bStripeMode);
                     }
                 });
             });
@@ -2932,36 +2987,7 @@ function checkLi(bForce, bExpanded) {
 
 //callback only if not payed
 function checkBackendEnabledPay(bForce, callback) {
-    if (bForce) {
-        callback();
-        return;
-    }
-
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function (event) {
-        if (xhr.readyState == 4) {
-            var statusRet = STATUS_OK;
-            var obj = null;
-
-            if (xhr.status == 200 && xhr.responseText !== undefined && xhr.responseText != "") {
-                try {
-                    obj = JSON.parse(xhr.responseText);
-                } catch (e) {
-                }
-            }
-            if (obj == null || !obj._value)
-                return;
-
-            if (obj._value && obj._value.indexOf("V3-ENABLED")==0)
-                callback();
-            return;
-        }
-    };
-    //https://trello.com/b/OpVbnPB4/plus-for-trello-public-board card "ENABLE CHROME STORE"
-    var url = "https://trello.com/1/cards/MM8LbbVO/desc";
-
-    xhr.open("GET", url, true);
-    xhr.send();
+    callback();
 }
 
 function handlePlusLicenseUrl(userOwner, idSub) {
@@ -3051,15 +3077,11 @@ function handlePlusLicenseUrl(userOwner, idSub) {
 Explore our <a href='https://trello.com/b/0jHOl1As/plus-for-trello-help'>Plus help board</a><br><br>\
 Go to <a href='https://trello.com'>trello.com</a><br><br>");
 
-                        if (!g_bProVersion) {
-                            var pairPro={};
-                            pairPro[LOCALPROP_PRO_VERSION] = true;
-                            chrome.storage.local.set(pairPro, function () {
-                                if (chrome.runtime.lastError == undefined)
-                                    g_bProVersion = true;
+                        if (!g_bProVersion && quantity > 0) {
+                            setProVersionOption(true, function () {
+                                hitAnalytics("LicActivation", "OK-ACTIVATED-STRIPE");
                             });
                         }
-                        hitAnalytics("LicActivation", "OK-ACTIVATED-STRIPE");
                         return;
                     });
                 }
@@ -3069,6 +3091,26 @@ Go to <a href='https://trello.com'>trello.com</a><br><br>");
             xhr.send();
 
         });
+    });
+}
+
+function setProVersionOption(bValue, callback) {
+    var pair = {};
+    pair[LOCALPROP_PRO_VERSION] = bValue;
+    var msNow = Date.now();
+    var bSetDate = false;
+    if (bValue && g_msStartPro == 0) {
+        bSetDate = true;
+        pair[LOCALPROP_PRO_MSDATEENABLED] = msNow;
+    }
+    chrome.storage.local.set(pair, function () {
+        if (chrome.runtime.lastError == undefined) {
+            g_bProVersion = bValue;
+            if (bSetDate)
+                g_msStartPro = msNow;
+        }
+        if (callback)
+            callback();
     });
 }
 

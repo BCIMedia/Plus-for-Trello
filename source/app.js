@@ -79,10 +79,10 @@ function insertCardTimer(containerBar) {
         if (sidebars.length == 0)
             return false;
 
-        var actions = sidebars.find($(".other-actions h3")).first();
+        var actions = sidebars.find($(".js-move-card")).first();
         if (actions.length == 0)
             return false;
-        var divInsert = actions.next();
+        var divInsert = actions.parent();
         if (divInsert.find($("#agile_timer")).size() != 0)
             return true;
 
@@ -165,8 +165,9 @@ function showFirstLicDialog(bExpanded, bShowWSOption, callback) {
     <div id="agile_FirstLic_title" tabindex="1" style="outline: none; text-align: center;cursor:pointer;">Click here to activate your "Plus for Trello Pro" yearly license.</div> \
     <div id="agile_FirstLic_content" style="display:none;"><br><b>"Plus for Trello Pro" yearly license</b><br>\
         <br>\
-        <p>Purchase a single or group license with Stripe.com payments.</p>\
-        <p>Click "Activate" to enter payment details now.</p><br>\
+        <p>Activate a single or group license with Stripe.com payments.</p>\
+        <p>You will then have 7 days to try "Pro" without charges.</p>\
+        <p>Click "Activate" to enter payment details.</p><br>\
         <a href="" class="button-link agile_dialog_Postit_button" id="agile_dialog_FirstLic_OK">Activate</a>&nbsp;&nbsp;\
         <a href="" class="button-link agile_dialog_Postit_button" style="" id="agile_dialog_FirstLic_Cancel">Later</a><br>\
         <br>\
@@ -186,7 +187,7 @@ function showFirstLicDialog(bExpanded, bShowWSOption, callback) {
         <span style="font-size:80%;color:#909090;float:left;">Note: <A href="http://www.plusfortrello.com" target="_blank" style="color:#909090;">Plus for Trello</A> is not associated with Trello or Atlassian.\
         </span>\
         <span style="float:right;">\<A href="\
-        https://translate.google.com.pe/?um=1&ie=UTF-8&hl=en&client=tw-ob#en/es/Purchase%20a%20single%20or%20group%20license%20with%20our%20secure%20%22stripe.com%22%20payments.%0A%0AClick%20%22Activate%22%20to%20enter%20payment%20details%20now.%0A%0AButtons%3A%20Activate%2C%20Later%0A%0A______________________________________________________________%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22Chrome%20Web%20Store%22%20payments%0A%0AYou%20can%20also%20purchase%20a%20single%20license%20(your%20own)%20using%20Google%20payments.%0A%0ARequires%20you%20use%20Chrome%20sign-in.%0A%0AThis%20method%20is%20for%20a%20single%20license.%20To%20purchase%20a%20group%20license%20use%20the%20other%20method%20above.%0A%0AButton%3A%20Activate%20with%20the%20Chrome%20Web%20Store%20%0A%0ANote%3A%20%22Plus%20for%20Trello%22%20is%20not%20associated%20with%20%22Trello%22%20or%20%22Atlassian%22.\
+        https://translate.google.com.pe/?um=1&ie=UTF-8&hl=en&client=tw-ob#en/es/Purchase%20a%20single%20or%20group%20license%20with%20our%20secure%20%22stripe.com%22%20payments.%0AYou%20will%20then%20have%207%20days%20to%20try%20%22Pro%22%20without%20charges.%0AClick%20%22Activate%22%20to%20enter%20payment%20details%20now.%0A%0AButtons%3A%20Activate%2C%20Later%0A%0A______________________________________________________________%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22Chrome%20Web%20Store%22%20payments%0A%0AYou%20can%20also%20purchase%20a%20single%20license%20(your%20own)%20using%20Google%20payments.%0A%0ARequires%20you%20use%20Chrome%20sign-in.%0A%0AThis%20method%20is%20for%20a%20single%20license.%20To%20purchase%20a%20group%20license%20use%20the%20other%20method%20above.%0A%0AButton%3A%20Activate%20with%20the%20Chrome%20Web%20Store%20%0A%0ANote%3A%20%22Plus%20for%20Trello%22%20is%20not%20associated%20with%20%22Trello%22%20or%20%22Atlassian%22.\
 " target="_blank">Translate</A></span>\
 <span style="float:right;margin-right:1em;">\<A href="http://www.plusfortrello.com/p/plus-for-trello-pro-version.html" target="_blank">Help</A></span>\
     <\div>\
@@ -242,14 +243,23 @@ function showFirstLicDialog(bExpanded, bShowWSOption, callback) {
             });
         });
 
+        var bOvertime = false;
+        if (g_msStartPro && (Date.now() - g_msStartPro > 1000 * 60 * 60 * 24 * 3)) {
+            bOvertime = true;
+        }
+
         divDialog.find("#agile_dialog_FirstLic_Cancel").off("click.plusForTrello").on("click.plusForTrello", function (e) {
             e.preventDefault(); //link click would navigate otherwise
             doCloseDialog(function () {
+                if (bOvertime)
+                    setTimeout(function () {
+                        sendDesktopNotification("If you do not wish to activate please turn off 'Pro' from the Plus Help pane.",10000);
+                    }, 1000);
                 callback("cancel");
             });
         });
 
-        if (bExpanded) {
+        if (bOvertime || bExpanded) {
             divDialog.find("#agile_FirstLic_title").hide();
             divDialog.find("#agile_FirstLic_content").show();
         } else {
@@ -444,16 +454,37 @@ function newerStoreVersion(bUrgentOnly) {
     return bNeedUpgrade;
 }
 
+function handleIframeLoad() {
+    var url = document.URL.toLowerCase();
+    if (url.indexOf("https://trello.com/embed/card?") == 0) {
+        checkTitle();
+        function checkTitle() {
+            //send the title to the iframe parent
+            var title = document.title;
+            if (!title)
+                setInterval(checkTitle, 200);
+            else {
+                window.parent.postMessage({
+                    type: 'trello_card_title',
+                    title: title
+                },
+                   '*' /* targetOrigin: any */);
+            }
+        }
+    }
+}
+
 $(function () {
     loadExtensionVersion(function () {
         setTimeout(function () { //in timeout so we can safely reference globals and give a little time for trello load itself since we  "run_at": "document_start"
             var bInIFrame = (window != window.top);
             setTrelloAuth(null, bInIFrame); //do this earliest
             if (bInIFrame) {
-                //We are on an iframe. This happens when trello authentication fails (dsc token is expired). background loads trello in an iframe, hitting here.
+                //Note: sometimes background loads trello in an iframe (when trello authentication fails, dsc token is expired)
+                handleIframeLoad();
                 return;
             }
-            setInterval(setTrelloAuth, 10000);
+            setInterval(setTrelloAuth, 10000); //review: why again? retry?
 
             //for <dialog>
             var preDialog = '<pre style="display:none;">dialog::backdrop\
@@ -597,12 +628,21 @@ function loadOptions(callback) {
                                  g_bCheckedbSumFiltered = objSync[keyPropbSumFilteredCardsOnly] || false;
                                  //alert("g_bEnableTrelloSync : " + g_bEnableTrelloSync + "\ncomments sync : " + g_optEnterSEByComment.bEnabled + "\ndisabled sync : " + g_bDisableSync);
 
-                                 chrome.storage.local.get([LOCALPROP_PRO_VERSION, LOCALPROP_EXTENSION_VERSIONSTORE], function (obj) {
+                                 chrome.storage.local.get([LOCALPROP_PRO_VERSION, LOCALPROP_PRO_MSDATEENABLED, LOCALPROP_EXTENSION_VERSIONSTORE], function (obj) {
                                     if (BLastErrorDetected())
                                         return;
                                     g_verStore = obj[LOCALPROP_EXTENSION_VERSIONSTORE] || "";
                                     g_bProVersion = obj[LOCALPROP_PRO_VERSION] || false;
-                                    callback();
+                                    g_msStartPro = obj[LOCALPROP_PRO_MSDATEENABLED] || 0;
+
+                                    if (!g_bProVersion || g_msStartPro > 0)
+                                        callback();
+                                    else {
+                                        //fix g_msStartPro
+                                        setProVersionOption(g_bProVersion, function () {
+                                            callback();
+                                        });
+                                    }
                                 });
                              });
 }
@@ -635,8 +675,29 @@ function doAllUpdates(bFromInterval) {
         sendExtensionMessage({ method: "notifyCardTab", idCard: idCard }, function (response) { });
     else {
         var idBoard = getIdBoardFromUrl(url);
-        if (idBoard)
+        if (idBoard) {
             sendExtensionMessage({ method: "notifyBoardTab", idBoard: idBoard }, function (response) { });
+            var pftSettings = $(".agile-pft-boardsettings");
+            if (pftSettings.length == 0) {
+                var boardmenu = $(".board-menu");
+                if (boardmenu.length > 0) {
+                    var settingsIcon = $(".board-menu-navigation-item .icon-share");
+                    if (settingsIcon.length > 0 && settingsIcon.is(":visible")) {
+                        var boardmenumav = $(".board-menu-navigation");
+                        if (boardmenumav.length > 0) {
+                            boardmenumav = boardmenumav.eq(boardmenumav.length>1?1:0);
+                            pftSettings = $("<A class='agile-pft-boardsettings board-menu-navigation-item-link' href=''>'Plus' Help & Settings</A>");
+                            var pftIcon = $("<A class='agile-pft-boardsettings-icon board-menu-navigation-item-link-icon'>");
+                            pftSettings.append(pftIcon);
+                            pftSettings.insertAfter(boardmenumav);
+                            pftSettings.click(function () {
+                                Help.display();
+                            });
+                        }
+                    }
+                }
+            }
+        }
     }
 
     if (bFromInterval && !isTabVisible())
