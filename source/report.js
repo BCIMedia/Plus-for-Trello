@@ -795,8 +795,8 @@ function alertNotes(){
     if (dayDiff % 14 <= 7) day = "Great Friday";
   }
   if(days[today.getDay()] == "Monday" && $("#sinceSimple").val() != "d-4"){
-    $("#sinceSimple").val("d-4");
-    $("#agile_title_header_report").children('button').click()
+    // $("#sinceSimple").val("d-4");
+    // $("#agile_title_header_report").children('button').click()
   }
 
 
@@ -814,10 +814,10 @@ function alertNotes(){
       }
       var time_note = $(this).find("td").eq(10).text();
       if(time_note.length > 1){
-        split_notes[$(this).find("td").eq(6).text()].push(' `' + time_note +  '` [' + $(this).find("td").eq(7).text() + ']');
+        split_notes[$(this).find("td").eq(6).text()].push($(this).find("td").eq(0).text() + ' by: '+$(this).find("td").eq(2).text() +' `' + time_note +  '` [' + $(this).find("td").eq(7).text() + ']');
       }
       else {
-        split_notes[$(this).find("td").eq(6).text()].push(' [' + $(this).find("td").eq(7).text() + ']');
+        split_notes[$(this).find("td").eq(6).text()].push($(this).find("td").eq(0).text() + ' by: '+$(this).find("td").eq(2).text() +' [' + $(this).find("td").eq(7).text() + ']');
       }
     });
     $.each( split_notes, function( key, value ) {
