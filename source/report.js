@@ -787,17 +787,6 @@ function alertNotes(){
   noteDay.setDate(today.getDay() == 1 ? today.getDate()-3 : today.getDate()-1);
   var days  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var day   = days[noteDay.getDay()];
-  //Was last work day a Great Friday?
-  //
-  if (day == 'Friday'){
-    var timeDiff = today - new Date("10/12/2018"); // A great Friday to calculate on.
-    var dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-    if (dayDiff % 14 <= 7) day = "Great Friday";
-  }
-  if(days[today.getDay()] == "Monday" && $("#sinceSimple").val() != "d-4"){
-    // $("#sinceSimple").val("d-4");
-    // $("#agile_title_header_report").children('button').click()
-  }
 
 
    // Depending on group by show notes for shown columns
@@ -814,25 +803,20 @@ function alertNotes(){
       }
       var time_note = $(this).find("td").eq(10).text();
       if(time_note.length > 1){
-        split_notes[$(this).find("td").eq(6).text()].push($(this).find("td").eq(0).text() + ' by: '+$(this).find("td").eq(2).text() +' `' + time_note +  '` [' + $(this).find("td").eq(7).text() + ']');
+        split_notes[$(this).find("td").eq(6).text()].push($(this).find("td").eq(0).text() + '	' + $(this).find("td").eq(2).text() + '	' + ' ' + time_note + '	' + $(this).find("td").eq(7).text());
       }
       else {
-        split_notes[$(this).find("td").eq(6).text()].push($(this).find("td").eq(0).text() + ' by: '+$(this).find("td").eq(2).text() +' [' + $(this).find("td").eq(7).text() + ']');
+        split_notes[$(this).find("td").eq(6).text()].push($(this).find("td").eq(0).text() + '	' + $(this).find("td").eq(2).text() + '	' + '	' + $(this).find("td").eq(7).text());
       }
     });
     $.each( split_notes, function( key, value ) {
-      notes.push(key + "\n•" + value.join("\n•"));
+      notes.push(key + "\n" + value.join("\n"));
     });
 
    }
-  //Is today a Great Friday
-  var this_day = days[new Date().getDay()]
-  if (this_day == 'Friday'){
-    var timeDiff = today - new Date("10/12/2018"); // A great Friday to calculate on.
-    var dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-    if (dayDiff % 14 <= 7) this_day = "Great Friday";
-  }
-  navigator.clipboard.writeText("*" + day + ":*\n" + notes.join("\n") + "\n*" + this_day + ":*");
+
+  var heading = "Card/Day 	Who 	Notes 	Hours\n";
+  navigator.clipboard.writeText(heading + notes.join("\n"));
   $("#alertNotes").text("Copied to Clipboard");
   setTimeout(function(){ $("#alertNotes").text("Notes") }, 1000);
 }
