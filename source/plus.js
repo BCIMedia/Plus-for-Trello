@@ -351,12 +351,91 @@ function configureSsLinks(bParam) {
 
 var g_userTrelloCurrent = null;
 
+function getCurrentUserByApi(callback, waitRetry) {
+    //https://trello.com/members/me/
+	var url = "https://trello.com/1/members/me?fields=username&token=";
+    url = url + $.cookie("token"); //trello requires the extra token besides the cookie to prevent accidental errors from extensions
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+    xhr.onreadystatechange = function (e) {
+        if (xhr.readyState == 4) {
+            handleFinishRequest();
+
+            function handleFinishRequest() {
+                var objRet = { status: "unknown error", hasPermission: false };
+                var bReturned = false;
+
+                if (xhr.status == 200) {
+                    try {
+                        objRet.hasPermission = true;
+                        objRet.obj = JSON.parse(xhr.responseText);
+                        objRet.status = STATUS_OK;
+                        bReturned = true;
+                        callback(objRet);
+                    } catch (ex) {
+                        objRet.status = "error: " + ex.message;
+                        logException(ex);
+                    }
+                } else {
+                    if (bHandledDeletedOrNoAccess(xhr.status, objRet, "error: permission error or deleted")) { //no permission or deleted
+                        null; //avoid lint
+                    }
+                    else if (xhr.status == 429) { //too many request, reached quota.
+                        var waitNew = (waitRetry || 500) * 2;
+                        if (waitNew < 8000) {
+                            bReturned = true;
+                            setTimeout(function () {
+                                getCurrentUserByApi(callback, waitNew);
+                            }, waitNew);
+                        }
+                        else {
+                            objRet.status = errFromXhr(xhr);
+                        }
+                    }
+                    else {
+                        objRet.status = errFromXhr(xhr);
+                    }
+                }
+
+                if (!bReturned)
+                    callback(objRet);
+            }
+        }
+    };
+
+    xhr.open("GET", url);
+    xhr.send();
+	}
+
+var g_bMakingUserApiCall = false;
+
 /* getCurrentTrelloUser
  *
  * returns null if user not logged in, or not yet loaded
  * else returns user (without @)
  **/
 function getCurrentTrelloUser() {
+	var user=getCurrentTrelloUserWorker();
+	if (user)
+		return user;
+	if (g_bMakingUserApiCall)
+		return null;
+	var header = $('#header');
+
+	if (header.length == 0)
+		return null;
+	
+	g_bMakingUserApiCall = true;
+	getCurrentUserByApi(function (response) {
+		g_bMakingUserApiCall = false;
+		if (response.status == STATUS_OK && response.obj && response.obj.username) {
+			g_userTrelloCurrent=response.obj.username;
+		} 
+	});
+	
+}
+
+function getCurrentTrelloUserWorker() {
 	if (g_userTrelloCurrent != null)
 		return g_userTrelloCurrent;
 	var header = $('#header');
