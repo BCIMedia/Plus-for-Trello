@@ -796,12 +796,12 @@ function alertNotes(){
   }
   if(days[today.getDay()] == "Monday" && $("#sinceSimple").val() != "d-4"){
     $("#sinceSimple").val("d-4");
-    $("#agile_title_header_report").children('button').click()
+    $("#agile_title_header_report").children('button').click();
   }
 
 
    // Depending on group by show notes for shown columns
-  var groupBy = $('#groupBy option:selected' ).text();
+  var groupBy = $('#groupBy option:selected').text();
   if(groupBy == "Card") {
     $(".agile_tooltipTable tbody").children().each((index, ele) => {
       notes.push($(ele).find("td").eq(3).text() + ' [' + $(ele).find("td").eq(7).text() + ']');
@@ -810,22 +810,23 @@ function alertNotes(){
     const split_notes = {};
     $(".agile_tooltipTable tbody").children().each((index, ele) => {
       const td = $(ele).find("td");
+      const board = $(td).eq(4).text();
+      const card = (board != 'Sprint' ? '(' + board + ') ' : '') + $(td).eq(6).text();
       if($(td).eq(7).text() > 0) { // Only add to notes if Spent is greater than 0
-        if(split_notes[$(td).eq(6).text()] === undefined){
-          split_notes[$(td).eq(6).text()] = [];
+        if(split_notes[card] === undefined) {
+          split_notes[card] = [];
         }
         const time_note = $(td).eq(10).text();
         if(time_note.length > 1) {
-          split_notes[$(td).eq(6).text()].push(' `' + time_note +  '` [' + $(td).eq(7).text() + ']');
+          split_notes[card].push(' `' + time_note +  '` [' + $(td).eq(7).text() + ']');
         } else {
-          split_notes[$(td).eq(6).text()].push(' [' + $(td).eq(7).text() + ']');
+          split_notes[card].push(' [' + $(td).eq(7).text() + ']');
         }
       }
     });
     $.each(split_notes, (key, value) => notes.push(key + "\n•" + value.join("\n•")));
-
-   }
-  // Is today a Great Friday
+  }
+  // Is today a Great Friday?
   var this_day = days[new Date().getDay()]
   if (this_day == 'Friday'){
     var timeDiff = today - new Date("10/12/2018"); // A great Friday to calculate on.
