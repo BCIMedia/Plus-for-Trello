@@ -729,18 +729,24 @@ function doSaveBoardValues(value, key) {
 }
 
 function getCurrentBoard() {
-	var boardNameContainerElem = $(".board-name");
+    if (getIdBoardFromUrl(document.URL) == null && getIdCardFromUrl(document.URL) == null)
+        return null;
+    
+    var boardNameContainerElem = $(".board-name");
 	if (boardNameContainerElem.length == 0) { //timing sensitive
-		boardNameContainerElem = $(".board-header-btn-name");
-		if (boardNameContainerElem.length == 0)
-			return null;
+        boardNameContainerElem = $(".board-header-btn-name");
+        if (boardNameContainerElem.length == 0) // new trello layout 2019-08-12
+            boardNameContainerElem = $(".board-header-btn");
+        if (boardNameContainerElem.length == 0)
+            return null;
 	}
 
-	if (getIdBoardFromUrl(document.URL) == null && getIdCardFromUrl(document.URL) == null)
-	    return null;
+    var boardNameElem = null;
+    
+    if (boardNameContainerElem && boardNameContainerElem.length>0)
+        boardNameElem = boardNameContainerElem.children(".board-header-btn-text");
 
-	var boardNameElem = boardNameContainerElem.children(".board-header-btn-text");
-	if (boardNameElem.length == 0)
+    if (boardNameElem==null || boardNameElem.length == 0)
 		return null;
 	var ret = boardNameElem.text().trim();
 	if (ret == "")

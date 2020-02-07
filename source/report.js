@@ -788,13 +788,25 @@ function alertNotes(){
   var days  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var day   = days[noteDay.getDay()];
 
+  // Was last work day a Great Friday?
+  if (day == 'Friday'){
+    var timeDiff = today - new Date("10/12/2018"); // A great Friday to calculate on.
+    var dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    if (dayDiff % 14 <= 7) day = "Great Friday";
+  }
+  if(days[today.getDay()] == "Monday" && $("#sinceSimple").val() != "d-4"){
+    $("#sinceSimple").val("d-4");
+    $("#agile_title_header_report").children('button').click();
+  }
+
 
    // Depending on group by show notes for shown columns
-  var groupBy = $('#groupBy option:selected' ).text();
-  if(groupBy == "Card"){
-    $(".agile_tooltipTable tbody").children().each(function(index){
-      notes.push($(this).find("td").eq(3).text() + ' [' + $(this).find("td").eq(7).text() + ']');
+  var groupBy = $('#groupBy option:selected').text();
+  if(groupBy == "Card") {
+    $(".agile_tooltipTable tbody").children().each((index, ele) => {
+      notes.push($(ele).find("td").eq(3).text() + ' [' + $(ele).find("td").eq(7).text() + ']');
     });
+
   }else if(groupBy == "S/E rows"){
     var split_notes = {};
     $(".agile_tooltipTable tbody").children().each(function(index){
@@ -817,6 +829,36 @@ function alertNotes(){
 
   var heading = "Card/Day 	Who 	Notes 	Hours\n";
   navigator.clipboard.writeText(heading + notes.join("\n"));
+/*
+  } else if(groupBy == "S/E rows") {
+    const split_notes = {};
+    $(".agile_tooltipTable tbody").children().each((index, ele) => {
+      const td = $(ele).find("td");
+      const board = $(td).eq(4).text();
+      const card = (board != 'Sprint' ? '(' + board + ') ' : '') + $(td).eq(6).text();
+      if($(td).eq(7).text() > 0) { // Only add to notes if Spent is greater than 0
+        if(split_notes[card] === undefined) {
+          split_notes[card] = [];
+        }
+        const time_note = $(td).eq(10).text();
+        if(time_note.length > 1) {
+          split_notes[card].push(' `' + time_note +  '` [' + $(td).eq(7).text() + ']');
+        } else {
+          split_notes[card].push(' [' + $(td).eq(7).text() + ']');
+        }
+      }
+    });
+    $.each(split_notes, (key, value) => notes.push(key + "\n•" + value.join("\n•")));
+  }
+*/
+  // Is today a Great Friday?
+  var this_day = days[new Date().getDay()]
+  if (this_day == 'Friday'){
+    var timeDiff = today - new Date("10/12/2018"); // A great Friday to calculate on.
+    var dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    if (dayDiff % 14 <= 7) this_day = "Great Friday";
+  }
+  navigator.clipboard.writeText("*" + day + ":*\n" + notes.join("\n") + "\n*" + this_day + ":*");
   $("#alertNotes").text("Copied to Clipboard");
   setTimeout(function(){ $("#alertNotes").text("Notes") }, 1000);
 }
