@@ -406,6 +406,25 @@ function showSEButtonBubble(elem) {
     showBubbleFromStep(step, true, true, 0);
 }
 
+function createWhoopsButton() {
+    var parent = $(".new-comment .comment-box-options");
+    if (parent.length == 1) {
+        var a = $("<A class='comment-box-options-item agile-whoopsButton' href='#' title='Reset Sync'>");
+        var spanIcon = $("<span class='icon-sm'/>");
+        var icon = $("<img style='margin-top:2px;'>").attr("src", chrome.extension.getURL("images/iconWhoops.png"));
+
+        //icon.addClass("agile-spent-icon-cardcommentSE");
+        spanIcon.append(icon);
+        a.append(spanIcon);
+        parent.prepend(a);
+        a.click(function () {
+          $(".new-comment .comment-box textarea")[0].value = "plus! ^resetsync";
+          $(".new-comment .comment-box .js-add-comment").attr("disabled", false)
+          $(".new-comment .comment-box .js-add-comment").click()
+        });
+    }
+}
+
 function createSEButton() {
     var parent = $(".new-comment .comment-box-options");
     if (parent.length == 1) {
@@ -803,14 +822,16 @@ function createCardSEInput(parentSEInput, idCardCur, board) {
 	}
 
 	comment.keypress(checkEnterKey);
-	
+
 	comment.bind("input", function (e) { updateCurrentSEData(); });
 	parentSEInput.before(container);
 	fillCardSEStats(tableStats, function () {
 	    container.show();
-        if (!g_bNoSE)
+        if (!g_bNoSE){
 	        createSEButton();
-	    insertCardTimer();
+          createWhoopsButton();
+        }
+        insertCardTimer();
 	    g_currentCardSEData.loadFromStorage(idCardCur, function () {
 	        if (g_currentCardSEData.idCard != idCardCur)
 	            return; //timing. should never happen but just in case
