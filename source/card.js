@@ -419,8 +419,8 @@ function createWhoopsButton() {
         parent.prepend(a);
         a.click(function () {
           $(".new-comment .comment-box textarea")[0].value = "plus! ^resetsync";
-          $(".new-comment .comment-box .js-add-comment").attr("disabled", false)
-          $(".new-comment .comment-box .js-add-comment").click()
+          $(".new-comment .comment-box .js-add-comment").attr("disabled", false);
+          $(".new-comment .comment-box .js-add-comment").click();
         });
     }
 }
