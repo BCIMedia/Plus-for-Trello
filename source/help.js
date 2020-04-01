@@ -379,7 +379,7 @@ var Help = {
 	        }, 8000);
 	    }, 200);
 	    helpWin.raw('<span style="font-size:1.7em;font-weight:bold;">Plus for Trello Help</span>');
-	    
+
 	    if (!g_bFirstTimeUse) {
 	        helpWin.raw('<span style="float:right;padding-right:6em;">\
 <A href="#agile_help_prefs">Preferences</A>&nbsp;&nbsp\
@@ -393,7 +393,7 @@ var Help = {
 <img src="https://www.linkedin.com/favicon.ico" title="Connect at LinkedIn" style="margin-bottom:-3px;margin-right:1px;border:0;width:16px;height:16px;"/></A></span>');
 	    }
 	    helpWin.para("version " + g_manifestVersion + "&nbsp;&nbsp<button style='float:right'>Close</button>").children("button").click(onClosePane);
-	    
+
 	    helpWin.para("&nbsp;");
 	    if (g_bFirstTimeUse) {
 	        var elemFirstTime = helpWin.raw("<div class='agile-help-firstTime'><b>To show this help again click <img src='" + chrome.extension.getURL("images/iconspenthelp.png") + "' style='width:22px;height:22px;' /> next to the tour <img style='padding-left:4px;padding-bottom:5px' src='" + chrome.extension.getURL("images/helparrow.png") + "' /></b></div>");
@@ -412,7 +412,7 @@ var Help = {
 	    comboLang.append($(new Option("Russian - Русский", "ru")));
 	    comboLang.append($(new Option("Spanish - Español", "es")));
 	    comboLang.append($(new Option("Other", "")));
-	    
+
 	    var paraLangOtherDetails = helpWin.raw('<p>Currently only the Plus Tour is translated.<br>\
 Plus is compatible with <A target="_blank" href="https://chrome.google.com/webstore/detail/google-translate/aapbdbdomjkkjkaonfhkkikfgjllcleb" >Google Translate Chrome extension</a> and\
  <A href="https://support.google.com/chrome/answer/173424" target="_blank">Chrome right-click translation</A>.<br>\
@@ -465,7 +465,7 @@ Plus is compatible with <A target="_blank" href="https://chrome.google.com/webst
 	            });
 	        });
 	    }
-	    
+
 	    if (getIdBoardFromUrl(document.URL) != "0jHOl1As") {
 	        helpWin.para("<div style='display:inline-block;border: 1px solid;border-radius:3px;border-color:RGB(77,77,77);padding:1em;background-color: #E4F0F6;'>Visit the <span style='font-weight:bold;font-size:110%;'><A target='_blank' href=''>Plus Help board</A></span> for the best place to learn about Plus.</div>").find("A").click(function (e) {
 	            window.open("https://trello.com/b/0jHOl1As/plus-for-trello-help", "_blank");
@@ -482,7 +482,7 @@ Plus is compatible with <A target="_blank" href="https://chrome.google.com/webst
 
 	    if (!g_bFirstTimeUse) {
 	        helpWin.para("<h3>Enable or disable Plus</h3>");
-	        
+
 	        helpWin.para('In the rare case you have issues with the display of trello pages:');
 	        var paraCheckDisable = helpWin.para('<input style="vertical-align:middle;" type="checkbox" class="agile_checkHelp" value="checkedDisablePlus">Disable changing trello.com pages. </input>\
 <a href="">Tell me more</a>');
@@ -525,7 +525,7 @@ Plus is compatible with <A target="_blank" href="https://chrome.google.com/webst
 Do not use Timers, Spent, Estimates or Points.</input>').children('input:checkbox:first');
 	        var checkNoEst = helpWin.para('<input style="vertical-align:bottom;" type="checkbox" class="agile_checkHelp">\
 Do not use Estimates (just Spent/Points).</input>').children('input:checkbox:first');
-	        
+
 	        checkNoSE[0].checked = g_bNoSE;
 	        checkNoEst[0].checked = g_bNoEst;
 	        checkNoEst.prop('disabled', g_bNoSE);
@@ -599,7 +599,7 @@ Enable "➤ sync" below to see Reports, full Chrome Plus menu, team S/E and use 
 	        if (cDaysUsingPlus > 2)
 	            strUsingPlusDays = '' + cDaysUsingPlus + ' days with Plus. ';
 	    }
-	   
+
 	    if (g_bFirstTimeUse) {
 	        helpWin.para('If you skip help, make sure to configure <b>Sync</b> and <b>Preferences</b> before using Plus.');
 	        helpWin.para('&nbsp');
@@ -815,7 +815,7 @@ Enable "➤ sync" below to see Reports, full Chrome Plus menu, team S/E and use 
 	    helpWin.para('<br>');
 	    helpWin.para("<b>Plus header</b>");
 	    helpWin.para('<img src="' + chrome.extension.getURL("images/s3.png") + '"/>');
-	    
+
 	    helpWin.para("The <A target='_blank' href='http://en.wikipedia.org/wiki/ISO_week_date'>ISO week</A> as in 2014-W49 is 2014's week 49. Weeks start on Sunday unless you change it in <b>Preferences</b>.");
 	    helpWin.paraSE('Click the week to change the view on trello.com charts and reports. <A href="https://plus.google.com/photos/+PlusfortrelloNews/albums/6004371895359551937/6004371896981799010"  target="_blank"><br>Click chart titles</A> in trello.com to zoom charts to full window.');
 	    helpWin.para('&nbsp');
@@ -833,7 +833,7 @@ Enable "➤ sync" below to see Reports, full Chrome Plus menu, team S/E and use 
         helpWin.paraSE('Open any card and click "Add S/E" or the little Plus icon inside the card comment.');
         helpWin.paraSE('<img src="' + chrome.extension.getURL("images/showsebar.png") + '"/>');
         helpWin.paraSE('&nbsp');
-        
+
         helpWin.paraEst('<b>E</b>stimate the units needed (per card or per user).');
         helpWin.paraEst('<b>S</b>pend units from the estimate.');
         helpWin.paraEst('<b>R</b>emain units: How many more units until all Estimate is Spent (Remain = Estimate minus Spent)');
@@ -954,7 +954,7 @@ Enable "➤ sync" below to see Reports, full Chrome Plus menu, team S/E and use 
 	    txtSEByCardComments = txtSEByCardComments + "<br>See <A href='http://www.plusfortrello.com/p/spent-estimate-card-comment-format.html' target='_blank'>card comment format help</A> for advanced features and keyword configuration ideas.";
 	    txtSEByCardComments = txtSEByCardComments + "<br><br>If your team entered S/E in Plus before 2015, also add 'plus s/e' as your last keyword. <A target='_blank' href='http://www.plusfortrello.com/2014/11/plus-for-trello-upgrade-from-legacy.html'>More</A>";
 
-	    var buttonshowNonMemberBoardsDialog = null; 
+	    var buttonshowNonMemberBoardsDialog = null;
 	    var txtSEByCardCommentsLast = "";
 	    if (!bAddFirstSyncNote)
 	        txtSEByCardCommentsLast = '<br>Find all boards in which you are not a member (Plus only syncs on boards with your direct membership):<br><input type="button" value="Find boards" />';
@@ -1285,7 +1285,7 @@ Enable "➤ sync" below to see Reports, full Chrome Plus menu, team S/E and use 
 	    helpWin.paraSE('<A href="http://www.plusfortrello.com/p/board-dimensions.html" target="_blank">More about "dimensions"</A>');
 	    helpWin.paraSE('&nbsp');
 	    helpWin.paraSE('<hr class="agile_hr_help"><br>');
-	   
+
 	    helpWin.para('<b><h2 id="agile_help_moreless">Less - More </h2></b>');
 	    helpWin.para("&bull; Clicking 'Less' on the page top hides cards with last activity over 4 weeks ago.");
 	    helpWin.para('&bull; <A target="_blank" href="http://help.trello.com/article/820-card-aging">Enable the Card Aging power-up</A> on each board to hide cards.');
@@ -1474,7 +1474,7 @@ Enable "➤ sync" below to see Reports, full Chrome Plus menu, team S/E and use 
 	            var bError = true;
 	            var strError = "";
 	            pair["dowDelta"] = valComboWeekDelta;
-	            
+
 	            chrome.storage.sync.set(pair, function () {
 	                if (chrome.runtime.lastError !== undefined) {
 	                    strError = " Error. Not saved.";
@@ -1630,7 +1630,7 @@ Hide "Remaining balance cards" section in Trello home.</input>').children('input
 	        });
 	    }
 
-	    
+
 	    if (true) {
 	        var checkAlwaysShowSEBar = helpWin.paraSE('<input style="vertical-align:middle;" type="checkbox" class="agile_checkHelp" value="checkedAlwaysShowSEBar">\
 Always show the "card S/E bar".</input>', null,
@@ -1772,7 +1772,7 @@ Do not show daily spent total popup notifications every time you enter spent.</i
 	    }
 
         //Options to show mini-me card popups
-	    if (true) { 
+	    if (true) {
 	        var comboCardPopupStyle = helpWin.para('Use <A href="https://trello.com/c/ZduasRWD/138-mini-me-card-popups" target="_blank">mini-me card popups</A> in reports and Chrome menu? <select style="width:auto"></select>').children('select:first');
 	        comboCardPopupStyle.append($(new Option("Yes, as small card popups (limited funcionality)", CARDPOPUPTYPE.POPUP_NOACTIONS)));
 	        comboCardPopupStyle.append($(new Option("Yes, as medium card popups (more functionality)", CARDPOPUPTYPE.POPUP_SOMEACTIONS)));
@@ -1979,7 +1979,7 @@ Accept the "Scrum for Trello" format in card titles: <i>(Estimate) card title [S
 	        var inputKWHome = paraKWHome.children('input:text:first');
 	        var buttonKWHome = paraKWHome.children('input:button:first');
 	        putKeywordsStringInUi(g_rgKeywordsHome, inputKWHome);
-	     
+
 	        buttonKWHome.click(function () {
 	            doSave(true);
 
@@ -2013,7 +2013,7 @@ Accept the "Scrum for Trello" format in card titles: <i>(Estimate) card title [S
 	            }
 	        });
 	    }
-        
+
 	    helpWin.para('NOTE: many preferences are hidden because you checked "do not use Timers, Spent, Estimates or Points" at the top of this help.')
             .addClass(CLASS_onlyNonPlusSE);
 	    helpWin.para('&nbsp');
@@ -2101,7 +2101,7 @@ Accept the "Scrum for Trello" format in card titles: <i>(Estimate) card title [S
 	    helpWin.para('<A target="_blank" href="http://www.plusfortrello.com/p/licences.html">View all licenses</A>.');
 	    helpWin.para('&nbsp');
 	    helpWin.para('<hr class="agile_hr_help"><br>');
-	    
+
 	    helpWin.para('<b><h2 id="agile_help_storage">Storage used</h2></b>');
 	    helpWin.para('&bull; Chrome sync: ' + helpWin.storageTotalSync + " bytes.");
 	    helpWin.para('&bull; Chrome local: ' + helpWin.storageTotalLocal + " bytes.");
@@ -2170,7 +2170,7 @@ Accept the "Scrum for Trello" format in card titles: <i>(Estimate) card title [S
 	            objHelp.m_container = null;
 	            container.remove();
 	            objHelp.enableIntervalScroll(false);
-	            
+
 	            if (objHelp.bStartTourBubbleOnClose) {
 	                objHelp.bStartTourBubbleOnClose = false;
 	                g_bNeedStartTourBubble = true;
@@ -2255,7 +2255,7 @@ function showNonMemberBoardsDialog() {
 
                         if (board.closed)
                             text += "[Closed] ";
-                        
+
                         var span = $("<span style='margin-right:1em;'>").text(text);
                         span.appendTo(li);
                         a.appendTo(li);
