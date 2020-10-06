@@ -406,6 +406,25 @@ function showSEButtonBubble(elem) {
     showBubbleFromStep(step, true, true, 0);
 }
 
+function createAllBCIButton() {
+    var parent = $(".new-comment .comment-box-options");
+    if (parent.length == 1) {
+        var a = $("<a class='comment-box-options-item agile-AllBCIButton' href='#' title='All Exemplars'>");
+        var spanIcon = $("<span class='icon-sm'/>");
+        var icon = $("<img style='margin-top:2px;'>").attr("src", chrome.extension.getURL("images/users-crown-solid.png"));
+
+        //icon.addClass("agile-spent-icon-cardcommentSE");
+        spanIcon.append(icon);
+        a.append(spanIcon);
+        parent.prepend(a);
+        a.click(function () {
+          $(".new-comment .comment-box textarea")[0].value = "plus! @sbolton42 @strikemike2k @jacereynolds @taylorlancaster2 ";
+          $(".new-comment .comment-box .js-add-comment").attr("disabled", false);
+          $(".new-comment .comment-box .js-add-comment").focus();
+          // $(".new-comment .comment-box .js-add-comment").click();
+        });
+    }
+}
 function createWhoopsButton() {
     var parent = $(".new-comment .comment-box-options");
     if (parent.length == 1) {
@@ -830,6 +849,7 @@ function createCardSEInput(parentSEInput, idCardCur, board) {
         if (!g_bNoSE){
 	        createSEButton();
           createWhoopsButton();
+          createAllBCIButton();
         }
         insertCardTimer();
 	    g_currentCardSEData.loadFromStorage(idCardCur, function () {
