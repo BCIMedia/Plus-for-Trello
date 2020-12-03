@@ -418,7 +418,7 @@ function createAllBCIButton() {
         a.append(spanIcon);
         parent.prepend(a);
         a.click(function () {
-          $(".new-comment .comment-box textarea")[0].value = "plus! @sbolton42 @strikemike2k @jacereynolds @taylorlancaster2 ";
+          $(".new-comment .comment-box textarea")[0].value = "plus! @jaredmatta1 @strikemike2k @jacereynolds @taylorlancaster2 ";
           $(".new-comment .comment-box .js-add-comment").attr("disabled", false);
           $(".new-comment .comment-box .js-add-comment").focus();
           // $(".new-comment .comment-box .js-add-comment").click();
