@@ -793,7 +793,7 @@ function alertNotes(){
     var timeDiff = today - new Date("10/12/2018"); // A great Friday to calculate on.
     var dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
     if (dayDiff % 14 <= 7) day = "Great Friday";
-    if (today.getFullYear() == 2020 && today.getMonth() == 11 && today.getDate() == 4) day == "Horrible Friday";
+    if (today.getFullYear() == 2020 && today.getMonth() == 11 && today.getDate() == 4) day = "Horrible Friday";
   }
   if(days[today.getDay()] == "Monday" && $("#sinceSimple").val() != "d-4"){
     $("#sinceSimple").val("d-4");
